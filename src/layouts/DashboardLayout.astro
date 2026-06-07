@@ -1,0 +1,150 @@
+---
+/**
+ * DashboardLayout.astro — VetCare Pro
+ * Layout base para todas las páginas internas del sistema.
+ * Props: title, section (para resaltar el item activo del sidebar)
+ */
+interface Props {
+  title: string;
+  section?: string;
+}
+const { title, section = '' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>{title} — VetCare Pro</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- CSS modular -->
+    <link rel="stylesheet" href="/src/assets/CSS/dashboard.css" />
+    <link rel="stylesheet" href="/src/assets/CSS/tables.css" />
+    <link rel="stylesheet" href="/src/assets/CSS/forms.css" />
+  </head>
+
+  <body>
+    <!-- Overlay móvil -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar" id="sidebar">
+      <a href="/dashboard" class="sidebar-logo">
+        <i class="fa-solid fa-paw"></i>
+        VetCare Pro
+        <span class="badge-demo">Demo</span>
+      </a>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+
+        <a href="/dashboard"        class={`nav-item ${section === 'dashboard' ? 'active' : ''}`}>
+          <i class="fa-solid fa-gauge-high"></i>
+          Dashboard
+        </a>
+
+        <div class="sidebar-section">Gestión</div>
+
+        <a href="/clientes"         class={`nav-item ${section === 'clientes' ? 'active' : ''}`}>
+          <i class="fa-solid fa-users"></i>
+          Clientes
+        </a>
+        <a href="/mascotas"         class={`nav-item ${section === 'mascotas' ? 'active' : ''}`}>
+          <i class="fa-solid fa-paw"></i>
+          Mascotas
+        </a>
+        <a href="/citas"            class={`nav-item ${section === 'citas' ? 'active' : ''}`}>
+          <i class="fa-solid fa-calendar-check"></i>
+          Citas
+          <span class="nav-badge" id="sidebar-badge-citas">0</span>
+        </a>
+        <a href="/historial"        class={`nav-item ${section === 'historial' ? 'active' : ''}`}>
+          <i class="fa-solid fa-file-medical"></i>
+          Historial Clínico
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card" id="user-card">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div>
+            <div class="user-name" id="user-name">Cargando…</div>
+            <div class="user-role" id="user-role"></div>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── HEADER ── -->
+    <header class="app-header">
+      <button class="hamburger-btn" id="hamburger-btn" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="header-title">
+        {title}<span>/ VetCare Pro</span>
+      </div>
+      <slot name="header-actions" />
+    </header>
+
+    <!-- ── CONTENIDO PRINCIPAL ── -->
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <!-- ── SCRIPTS GLOBALES ── -->
+    <script type="module">
+      import { requireAuth, getSesion, logout, labelRol } from '/src/assets/JS/auth.js';
+      import { Citas } from '/src/assets/JS/db.js';
+
+      // Guard de autenticación
+      const sesion = requireAuth('/login');
+      if (!sesion) throw new Error('No autenticado');
+
+      // Rellenar datos del usuario en sidebar
+      document.getElementById('user-avatar').textContent = sesion.avatar;
+      document.getElementById('user-name').textContent   = sesion.nombre;
+      document.getElementById('user-role').textContent   = labelRol(sesion.rol);
+
+      // Badge de citas pendientes
+      const pendientes = Citas.getPendientes().length;
+      const badge = document.getElementById('sidebar-badge-citas');
+      if (badge) {
+        badge.textContent = pendientes;
+        badge.style.display = pendientes > 0 ? 'inline-flex' : 'none';
+      }
+
+      // Logout
+      document.getElementById('logout-btn')?.addEventListener('click', () => {
+        if (confirm('¿Cerrar sesión?')) logout();
+      });
+
+      // Hamburger (móvil)
+      const hamburger = document.getElementById('hamburger-btn');
+      const sidebar   = document.getElementById('sidebar');
+      const overlay   = document.getElementById('sidebar-overlay');
+
+      hamburger?.addEventListener('click', () => {
+        sidebar?.classList.toggle('open');
+        overlay?.classList.toggle('active');
+      });
+      overlay?.addEventListener('click', () => {
+        sidebar?.classList.remove('open');
+        overlay?.classList.remove('active');
+      });
+    </script>
+  </body>
+</html>

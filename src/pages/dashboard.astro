@@ -1,0 +1,178 @@
+---
+// dashboard.astro — VetCare Pro
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Dashboard" section="dashboard">
+
+  <!-- ── STATS ── -->
+  <div class="page-header">
+    <div class="page-header-text">
+      <h1>Panel Principal</h1>
+      <p>Resumen general de tu clínica veterinaria</p>
+    </div>
+    <div class="page-actions">
+      <a href="/citas" class="btn btn-primary">
+        <i class="fa-solid fa-calendar-plus"></i>
+        Nueva cita
+      </a>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-teal"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-info">
+        <div class="stat-number" id="stat-clientes">—</div>
+        <div class="stat-label">Total clientes</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-mint"><i class="fa-solid fa-paw"></i></div>
+      <div class="stat-info">
+        <div class="stat-number" id="stat-mascotas">—</div>
+        <div class="stat-label">Total mascotas</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-gold"><i class="fa-solid fa-calendar-day"></i></div>
+      <div class="stat-info">
+        <div class="stat-number" id="stat-citas-hoy">—</div>
+        <div class="stat-label">Citas hoy</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-red"><i class="fa-solid fa-clock"></i></div>
+      <div class="stat-info">
+        <div class="stat-number" id="stat-pendientes">—</div>
+        <div class="stat-label">Citas pendientes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de dos columnas -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+
+    <!-- Citas de hoy -->
+    <div class="card">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-calendar-day" style="color:var(--teal-300); margin-right:.5rem;"></i>Citas de hoy</h2>
+        <a href="/citas" class="btn btn-ghost btn-sm">Ver todas</a>
+      </div>
+      <div id="citas-hoy-list"></div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="card">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-bolt" style="color:var(--gold); margin-right:.5rem;"></i>Accesos rápidos</h2>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:.7rem;">
+        <a href="/clientes" class="btn btn-secondary" style="justify-content:flex-start;">
+          <i class="fa-solid fa-user-plus" style="color:var(--teal-300);"></i>
+          Gestionar clientes
+        </a>
+        <a href="/mascotas" class="btn btn-secondary" style="justify-content:flex-start;">
+          <i class="fa-solid fa-paw" style="color:var(--mint);"></i>
+          Ver mascotas
+        </a>
+        <a href="/citas" class="btn btn-secondary" style="justify-content:flex-start;">
+          <i class="fa-solid fa-calendar-plus" style="color:var(--gold);"></i>
+          Agendar cita
+        </a>
+        <a href="/historial" class="btn btn-secondary" style="justify-content:flex-start;">
+          <i class="fa-solid fa-file-medical" style="color:var(--danger);"></i>
+          Historial clínico
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Últimas mascotas registradas -->
+  <div class="card">
+    <div class="card-header">
+      <h2><i class="fa-solid fa-star" style="color:var(--mint); margin-right:.5rem;"></i>Mascotas registradas recientemente</h2>
+      <a href="/mascotas" class="btn btn-ghost btn-sm">Ver todas</a>
+    </div>
+    <div id="mascotas-recientes"></div>
+  </div>
+
+</DashboardLayout>
+
+<script type="module">
+  import { getStats, Citas, Mascotas, Clientes } from '/src/assets/JS/db.js';
+  import { formatFecha, estadoBadge, especieIcon, iniciales } from '/src/assets/JS/utils.js';
+
+  // ── Stats ──
+  const s = getStats();
+  document.getElementById('stat-clientes').textContent  = s.totalClientes;
+  document.getElementById('stat-mascotas').textContent  = s.totalMascotas;
+  document.getElementById('stat-citas-hoy').textContent = s.citasHoy;
+  document.getElementById('stat-pendientes').textContent= s.citasPendientes;
+
+  // ── Citas hoy ──
+  const citasHoy = Citas.getHoy();
+  const citasEl  = document.getElementById('citas-hoy-list');
+  if (citasHoy.length === 0) {
+    citasEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No hay citas programadas para hoy.</p></div>`;
+  } else {
+    const mascotas = Mascotas.getAll();
+    const clientes = Clientes.getAll();
+    citasEl.innerHTML = citasHoy.map(c => {
+      const m  = mascotas.find(x => x.id === c.idMascota) || {};
+      const cl = clientes.find(x => x.id === m.idCliente) || {};
+      const { label, cls } = estadoBadge(c.estado);
+      return `
+        <div style="display:flex; align-items:center; gap:.8rem; padding:.9rem 1.4rem; border-bottom:1px solid rgba(255,255,255,.04);">
+          <i class="fa-solid ${especieIcon(m.especie)}" style="color:var(--teal-300); width:20px;"></i>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:.88rem;">${m.nombre || '—'} <span style="color:rgba(255,255,255,.4); font-weight:400;">· ${cl.nombre || '—'}</span></div>
+            <div style="font-size:.75rem; color:rgba(255,255,255,.4);">${c.hora} · ${c.motivo}</div>
+          </div>
+          <span class="badge ${cls}">${label}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Mascotas recientes (últimas 5) ──
+  const mascotas = Mascotas.getAll().slice(0, 5);
+  const clientes = Clientes.getAll();
+  const mascEl   = document.getElementById('mascotas-recientes');
+  mascEl.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr>
+          <th>Mascota</th>
+          <th>Especie / Raza</th>
+          <th>Dueño</th>
+          <th>Edad</th>
+          <th>Peso</th>
+        </tr></thead>
+        <tbody>
+          ${mascotas.map(m => {
+            const cl = clientes.find(c => c.id === m.idCliente) || {};
+            return `
+              <tr>
+                <td>
+                  <div class="cell-avatar">
+                    <div class="avatar">${m.nombre?.[0] ?? '?'}</div>
+                    <div><div class="cell-name">${m.nombre}</div></div>
+                  </div>
+                </td>
+                <td><span class="pet-chip"><i class="fa-solid ${especieIcon(m.especie)}"></i>${m.especie}</span> ${m.raza}</td>
+                <td>${cl.nombre || '—'}</td>
+                <td>${m.edad} ${m.edad === 1 ? 'año' : 'años'}</td>
+                <td>${m.peso} kg</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  // Responsive: colapsar grid a 1 col en móvil
+  if (window.innerWidth <= 768) {
+    document.querySelector('[style*="grid-template-columns: 1fr 1fr"]')
+      ?.setAttribute('style', 'display:grid; grid-template-columns:1fr; gap:1.5rem; margin-bottom:2rem;');
+  }
+</script>

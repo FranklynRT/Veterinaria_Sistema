@@ -1,0 +1,295 @@
+---
+// clientes/detalle.astro — VetCare Pro
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Detalle del cliente" section="clientes">
+
+  <!-- Header dinámico -->
+  <div class="page-header">
+    <div class="page-header-text">
+      <div style="display:flex; align-items:center; gap:.8rem; margin-bottom:.4rem;">
+        <a href="/clientes" class="btn btn-ghost btn-sm">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1 id="detalle-nombre">Cargando…</h1>
+      </div>
+      <p id="detalle-meta" class="text-muted"></p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-secondary" id="btn-editar-cliente">
+        <i class="fa-solid fa-pen"></i> Editar
+      </button>
+      <button class="btn btn-primary" id="btn-add-mascota">
+        <i class="fa-solid fa-plus"></i> Nueva mascota
+      </button>
+    </div>
+  </div>
+
+  <!-- Tarjeta de info del cliente -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header"><h2>Información del dueño</h2></div>
+    <div class="card-body">
+      <div class="detail-grid">
+        <div class="detail-field">
+          <label>Nombre completo</label>
+          <span id="d-nombre">—</span>
+        </div>
+        <div class="detail-field">
+          <label>Teléfono</label>
+          <span id="d-tel">—</span>
+        </div>
+        <div class="detail-field">
+          <label>Correo electrónico</label>
+          <span id="d-email">—</span>
+        </div>
+        <div class="detail-field">
+          <label>Fecha de registro</label>
+          <span id="d-fecha">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mascotas del cliente -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header">
+      <h2><i class="fa-solid fa-paw" style="color:var(--teal-300); margin-right:.5rem;"></i>Mascotas</h2>
+    </div>
+    <div id="mascotas-container"></div>
+  </div>
+
+  <!-- Citas del cliente -->
+  <div class="card">
+    <div class="card-header">
+      <h2><i class="fa-solid fa-calendar-check" style="color:var(--gold); margin-right:.5rem;"></i>Historial de citas</h2>
+      <a href="/citas" class="btn btn-ghost btn-sm">Nueva cita</a>
+    </div>
+    <div id="citas-container"></div>
+  </div>
+
+  <!-- ══ MODAL EDITAR CLIENTE ══ -->
+  <div class="modal-wrapper" id="modal-edit">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Editar cliente</span>
+        <button class="modal-close" id="modal-edit-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-edit" novalidate>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label class="form-label" for="e-nombre">Nombre completo <span class="required">*</span></label>
+              <input id="e-nombre" type="text" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="e-tel">Teléfono <span class="required">*</span></label>
+              <input id="e-tel" type="tel" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="e-email">Correo <span class="required">*</span></label>
+              <input id="e-email" type="email" class="form-control" required />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-edit-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-edit"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL NUEVA MASCOTA ══ -->
+  <div class="modal-wrapper" id="modal-mascota">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Nueva mascota</span>
+        <button class="modal-close" id="modal-mas-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-mascota" novalidate>
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="m-nombre">Nombre <span class="required">*</span></label>
+              <input id="m-nombre" type="text" class="form-control" placeholder="Max" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="m-especie">Especie <span class="required">*</span></label>
+              <select id="m-especie" class="form-control" required>
+                <option value="">Seleccionar…</option>
+                <option>Perro</option><option>Gato</option><option>Ave</option>
+                <option>Conejo</option><option>Pez</option><option>Caballo</option><option>Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="m-raza">Raza</label>
+              <input id="m-raza" type="text" class="form-control" placeholder="Labrador" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="m-edad">Edad (años) <span class="required">*</span></label>
+              <input id="m-edad" type="number" class="form-control" placeholder="2" min="0" max="40" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="m-peso">Peso (kg)</label>
+              <input id="m-peso" type="number" class="form-control" placeholder="5.0" step="0.1" min="0" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-mas-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-mascota"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+      </div>
+    </div>
+  </div>
+
+</DashboardLayout>
+
+<script type="module">
+  import { Clientes, Mascotas, Citas } from '/src/assets/JS/db.js';
+  import { formatFecha, formatFechaHora, estadoBadge, especieIcon, abrirModal, cerrarModal, toast } from '/src/assets/JS/utils.js';
+
+  const params    = new URLSearchParams(window.location.search);
+  const clienteId = params.get('id');
+
+  if (!clienteId) { window.location.href = '/clientes'; }
+
+  let cliente = Clientes.getById(clienteId);
+  if (!cliente) { window.location.href = '/clientes'; }
+
+  function cargarCliente() {
+    cliente = Clientes.getById(clienteId);
+    document.getElementById('detalle-nombre').textContent = cliente.nombre;
+    document.getElementById('detalle-meta').textContent   = `Registrado el ${formatFecha(cliente.fechaRegistro)}`;
+    document.getElementById('d-nombre').textContent = cliente.nombre;
+    document.getElementById('d-tel').textContent    = cliente.telefono;
+    document.getElementById('d-email').textContent  = cliente.email;
+    document.getElementById('d-fecha').textContent  = formatFecha(cliente.fechaRegistro);
+  }
+
+  function renderMascotas() {
+    const lista = Mascotas.getByCliente(clienteId);
+    const cont  = document.getElementById('mascotas-container');
+    if (lista.length === 0) {
+      cont.innerHTML = `<div class="empty-state"><i class="fa-solid fa-paw"></i><p>Este cliente no tiene mascotas aún.</p></div>`;
+      return;
+    }
+    cont.innerHTML = `
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Nombre</th><th>Especie</th><th>Raza</th><th>Edad</th><th>Peso</th><th>Acciones</th></tr></thead>
+          <tbody>
+            ${lista.map(m => `
+              <tr>
+                <td><div class="cell-avatar">
+                  <div class="avatar" style="background:linear-gradient(135deg,var(--mint),#22c99a);color:var(--teal-900);">${m.nombre[0]}</div>
+                  <div class="cell-name">${m.nombre}</div>
+                </div></td>
+                <td><span class="pet-chip"><i class="fa-solid ${especieIcon(m.especie)}"></i>${m.especie}</span></td>
+                <td>${m.raza || '—'}</td>
+                <td>${m.edad} año${m.edad !== 1 ? 's' : ''}</td>
+                <td>${m.peso ? m.peso + ' kg' : '—'}</td>
+                <td>
+                  <div class="cell-actions">
+                    <a href="/historial?mascota=${m.id}" class="btn btn-ghost btn-icon btn-sm" title="Ver historial">
+                      <i class="fa-solid fa-file-medical" style="color:var(--teal-300);"></i>
+                    </a>
+                    <button class="btn btn-ghost btn-icon btn-sm btn-danger" title="Eliminar mascota"
+                      onclick="eliminarMascota('${m.id}','${m.nombre}')">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderCitas() {
+    const mascotas = Mascotas.getByCliente(clienteId);
+    const ids      = mascotas.map(m => m.id);
+    const citas    = Citas.getAll().filter(c => ids.includes(c.idMascota));
+    const cont     = document.getElementById('citas-container');
+    if (citas.length === 0) {
+      cont.innerHTML = `<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>Sin citas registradas.</p></div>`;
+      return;
+    }
+    cont.innerHTML = `
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Mascota</th><th>Fecha y Hora</th><th>Motivo</th><th>Estado</th></tr></thead>
+          <tbody>
+            ${citas.map(c => {
+              const m = mascotas.find(x => x.id === c.idMascota) || {};
+              const { label, cls } = estadoBadge(c.estado);
+              return `<tr>
+                <td><span class="pet-chip"><i class="fa-solid ${especieIcon(m.especie)}"></i>${m.nombre || '—'}</span></td>
+                <td>${formatFechaHora(c.fecha, c.hora)}</td>
+                <td>${c.motivo}</td>
+                <td><span class="badge ${cls}">${label}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  // Modal editar
+  document.getElementById('btn-editar-cliente').addEventListener('click', () => {
+    document.getElementById('e-nombre').value = cliente.nombre;
+    document.getElementById('e-tel').value    = cliente.telefono;
+    document.getElementById('e-email').value  = cliente.email;
+    abrirModal('modal-edit');
+  });
+  ['modal-edit-close','modal-edit-cancel'].forEach(id =>
+    document.getElementById(id)?.addEventListener('click', () => cerrarModal('modal-edit'))
+  );
+  document.getElementById('btn-save-edit').addEventListener('click', () => {
+    const nombre = document.getElementById('e-nombre').value.trim();
+    const tel    = document.getElementById('e-tel').value.trim();
+    const email  = document.getElementById('e-email').value.trim();
+    if (!nombre || !tel || !email) { toast('Completa todos los campos.', 'error'); return; }
+    Clientes.update(clienteId, { nombre, telefono: tel, email });
+    cerrarModal('modal-edit');
+    cargarCliente();
+    toast('Cliente actualizado.', 'success');
+  });
+
+  // Modal mascota
+  document.getElementById('btn-add-mascota').addEventListener('click', () => {
+    document.getElementById('form-mascota').reset();
+    abrirModal('modal-mascota');
+  });
+  ['modal-mas-close','modal-mas-cancel'].forEach(id =>
+    document.getElementById(id)?.addEventListener('click', () => cerrarModal('modal-mascota'))
+  );
+  document.getElementById('btn-save-mascota').addEventListener('click', () => {
+    const nombre  = document.getElementById('m-nombre').value.trim();
+    const especie = document.getElementById('m-especie').value;
+    const raza    = document.getElementById('m-raza').value.trim();
+    const edad    = Number(document.getElementById('m-edad').value);
+    const peso    = parseFloat(document.getElementById('m-peso').value) || 0;
+    if (!nombre || !especie || !edad) { toast('Nombre, especie y edad son obligatorios.', 'error'); return; }
+    Mascotas.save({ idCliente: clienteId, nombre, especie, raza, edad, peso });
+    cerrarModal('modal-mascota');
+    renderMascotas();
+    toast(`${nombre} registrada.`, 'success');
+  });
+
+  window.eliminarMascota = (id, nombre) => {
+    if (!confirm(`¿Eliminar a ${nombre}? Se perderán sus citas e historial.`)) return;
+    Mascotas.remove(id);
+    renderMascotas();
+    renderCitas();
+    toast(`${nombre} eliminada.`, 'info');
+  };
+
+  // Init
+  cargarCliente();
+  renderMascotas();
+  renderCitas();
+</script>

@@ -1,0 +1,380 @@
+---
+// citas/index.astro — VetCare Pro
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Citas" section="citas">
+
+  <div class="page-header">
+    <div class="page-header-text">
+      <h1>Agenda de Citas</h1>
+      <p>Organiza las consultas y visitas médicas de los pacientes</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" id="btn-nueva-cita">
+        <i class="fa-solid fa-calendar-plus"></i>
+        Nueva cita
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar de Filtros -->
+  <div class="table-toolbar" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+    <!-- Búsqueda -->
+    <div class="search-box" style="flex:1; min-width:220px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="Buscar por mascota, dueño o motivo…" />
+    </div>
+
+    <!-- Filtro de Fecha -->
+    <div style="display:flex; gap:.5rem; align-items:center;">
+      <span class="text-muted" style="font-size:.82rem;">Fecha:</span>
+      <input type="date" id="filter-date" class="form-control" style="width:auto; padding-top:.4rem; padding-bottom:.4rem;" />
+      <button class="btn btn-secondary btn-sm" id="btn-clear-date" style="padding-top:.4rem; padding-bottom:.4rem;">Ver todas</button>
+    </div>
+
+    <!-- Filtro de Estado -->
+    <div style="display:flex; gap:.5rem; align-items:center;">
+      <span class="text-muted" style="font-size:.82rem;">Estado:</span>
+      <select id="filter-estado" class="form-control" style="width:auto; padding-top:.4rem; padding-bottom:.4rem; min-width:130px;">
+        <option value="">Todos</option>
+        <option value="pendiente">Pendientes</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+      </select>
+    </div>
+
+    <span id="count-label" class="text-muted" style="margin-left:auto;"></span>
+  </div>
+
+  <!-- Tabla de Citas -->
+  <div class="card">
+    <div class="data-table-wrap">
+      <table class="data-table" id="citas-table">
+        <thead>
+          <tr>
+            <th>Mascota / Especie</th>
+            <th>Dueño</th>
+            <th>Fecha y Hora</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="citas-tbody"></tbody>
+      </table>
+    </div>
+    <div id="empty-citas" class="empty-state hidden">
+      <i class="fa-solid fa-calendar-xmark"></i>
+      <p>No se encontraron citas programadas con los filtros seleccionados.</p>
+    </div>
+  </div>
+
+  <!-- ══ MODAL NUEVA CITA ══ -->
+  <div class="modal-wrapper" id="modal-cita">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Nueva Cita Médica</span>
+        <button class="modal-close" id="modal-cita-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-cita" novalidate>
+          <div class="form-grid form-grid-2">
+            <!-- Cliente -->
+            <div class="form-group">
+              <label class="form-label" for="c-cliente">Dueño (Cliente) <span class="required">*</span></label>
+              <select id="c-cliente" class="form-control" required>
+                <option value="">Seleccionar dueño…</option>
+              </select>
+            </div>
+
+            <!-- Mascota -->
+            <div class="form-group">
+              <label class="form-label" for="c-mascota">Mascota <span class="required">*</span></label>
+              <select id="c-mascota" class="form-control" required disabled>
+                <option value="">Selecciona un dueño primero…</option>
+              </select>
+            </div>
+
+            <!-- Fecha -->
+            <div class="form-group">
+              <label class="form-label" for="c-fecha">Fecha <span class="required">*</span></label>
+              <input type="date" id="c-fecha" class="form-control" required />
+            </div>
+
+            <!-- Hora -->
+            <div class="form-group">
+              <label class="form-label" for="c-hora">Hora <span class="required">*</span></label>
+              <input type="time" id="c-hora" class="form-control" required />
+            </div>
+
+            <!-- Motivo -->
+            <div class="form-group full">
+              <label class="form-label" for="c-motivo">Motivo de la cita <span class="required">*</span></label>
+              <input type="text" id="c-motivo" class="form-control" placeholder="Ej: Vacunación triple, control de peso, dolor estomacal..." required />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cita-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="btn-guardar-cita">
+          <i class="fa-solid fa-calendar-plus"></i> Agendar Cita
+        </button>
+      </div>
+    </div>
+  </div>
+
+</DashboardLayout>
+
+<script type="module">
+  import { Citas, Mascotas, Clientes } from '/src/assets/JS/db.js';
+  import { formatFecha, estadoBadge, especieIcon, abrirModal, cerrarModal, toast } from '/src/assets/JS/utils.js';
+
+  // ── Renderizar tabla ──────────────────────────────────────
+  function renderTabla() {
+    const listaCitas = Citas.getAll();
+    const listaMascotas = Mascotas.getAll();
+    const listaClientes = Clientes.getAll();
+    const tbody = document.getElementById('citas-tbody');
+    const empty = document.getElementById('empty-citas');
+    const countLabel = document.getElementById('count-label');
+
+    const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+    const dateVal = document.getElementById('filter-date').value;
+    const estadoVal = document.getElementById('filter-estado').value;
+
+    const filtradas = listaCitas.filter(c => {
+      const m = listaMascotas.find(x => x.id === c.idMascota) || {};
+      const cl = listaClientes.find(x => x.id === m.idCliente) || {};
+      
+      const matchesSearch = m.nombre?.toLowerCase().includes(searchVal) ||
+                            cl.nombre?.toLowerCase().includes(searchVal) ||
+                            c.motivo?.toLowerCase().includes(searchVal);
+                            
+      const matchesDate = dateVal === '' || c.fecha === dateVal;
+      const matchesEstado = estadoVal === '' || c.estado === estadoVal;
+
+      return matchesSearch && matchesDate && matchesEstado;
+    });
+
+    countLabel.textContent = `${filtradas.length} cita${filtradas.length !== 1 ? 's' : ''}`;
+
+    if (filtradas.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    tbody.innerHTML = filtradas.map(c => {
+      const m = listaMascotas.find(x => x.id === c.idMascota) || { nombre: '—', especie: 'Otro' };
+      const cl = listaClientes.find(x => x.id === m.idCliente) || { nombre: '—', id: '' };
+      const { label, cls } = estadoBadge(c.estado);
+
+      const linkDueno = cl.id 
+        ? `<a href="/clientes/detalle?id=${cl.id}" style="color:var(--teal-300); text-decoration:none; font-weight:500;">${cl.nombre}</a>`
+        : '—';
+
+      // Acciones condicionales por estado
+      let btnAcciones = '';
+      if (c.estado === 'pendiente') {
+        btnAcciones = `
+          <button class="btn btn-ghost btn-icon btn-sm" title="Completar cita" onclick="completarCita('${c.id}')">
+            <i class="fa-solid fa-circle-check" style="color:var(--mint);"></i>
+          </button>
+          <button class="btn btn-ghost btn-icon btn-sm" title="Cancelar cita" onclick="cancelarCita('${c.id}')">
+            <i class="fa-solid fa-circle-xmark" style="color:var(--danger);"></i>
+          </button>
+        `;
+      } else if (c.estado === 'completada') {
+        btnAcciones = `
+          <a href="/historial?mascota=${m.id}" class="btn btn-ghost btn-icon btn-sm" title="Ver historial / Agregar consulta">
+            <i class="fa-solid fa-file-medical" style="color:var(--teal-300);"></i>
+          </a>
+        `;
+      }
+
+      return `
+        <tr>
+          <td>
+            <span class="pet-chip">
+              <i class="fa-solid ${especieIcon(m.especie)}"></i>
+              ${m.nombre}
+            </span>
+          </td>
+          <td>${linkDueno}</td>
+          <td>
+            <div style="font-weight:600;">${formatFecha(c.fecha)}</div>
+            <div style="font-size:.78rem; opacity:.7;"><i class="fa-regular fa-clock" style="margin-right:.2rem;"></i>${c.hora}</div>
+          </td>
+          <td style="max-width: 250px; white-space: normal; word-break: break-word;">${c.motivo}</td>
+          <td><span class="badge ${cls}">${label}</span></td>
+          <td>
+            <div class="cell-actions">
+              ${btnAcciones}
+              <button class="btn btn-ghost btn-icon btn-sm" title="Eliminar cita" onclick="eliminarCita('${c.id}')">
+                <i class="fa-solid fa-trash" style="opacity:.6;"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Cargar clientes
+  function cargarClientes() {
+    const clientes = Clientes.getAll();
+    const select = document.getElementById('c-cliente');
+    select.innerHTML = '<option value="">Seleccionar dueño…</option>';
+    clientes.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.nombre;
+      select.appendChild(opt);
+    });
+  }
+
+  // Manejar cambio de cliente en modal
+  document.getElementById('c-cliente').addEventListener('change', e => {
+    const idCliente = e.target.value;
+    const mascotaSelect = document.getElementById('c-mascota');
+    
+    if (!idCliente) {
+      mascotaSelect.innerHTML = '<option value="">Selecciona un dueño primero…</option>';
+      mascotaSelect.disabled = true;
+      return;
+    }
+
+    const mascotas = Mascotas.getByCliente(idCliente);
+    if (mascotas.length === 0) {
+      mascotaSelect.innerHTML = '<option value="">Este cliente no tiene mascotas</option>';
+      mascotaSelect.disabled = true;
+      return;
+    }
+
+    mascotaSelect.innerHTML = '<option value="">Selecciona mascota…</option>';
+    mascotas.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nombre;
+      mascotaSelect.appendChild(opt);
+    });
+    mascotaSelect.disabled = false;
+  });
+
+  // Filtros listeners
+  document.getElementById('search-input').addEventListener('input', renderTabla);
+  document.getElementById('filter-date').addEventListener('input', renderTabla);
+  document.getElementById('filter-estado').addEventListener('change', renderTabla);
+  document.getElementById('btn-clear-date').addEventListener('click', () => {
+    document.getElementById('filter-date').value = '';
+    renderTabla();
+  });
+
+  // Modal handlers
+  document.getElementById('btn-nueva-cita').addEventListener('click', () => {
+    document.getElementById('form-cita').reset();
+    document.getElementById('c-mascota').disabled = true;
+    document.getElementById('c-mascota').innerHTML = '<option value="">Selecciona un dueño primero…</option>';
+    cargarClientes();
+    
+    // Auto-completar fecha de hoy
+    document.getElementById('c-fecha').value = new Date().toISOString().split('T')[0];
+    
+    abrirModal('modal-cita');
+  });
+
+  ['modal-cita-close', 'modal-cita-cancel'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', () => cerrarModal('modal-cita'));
+  });
+
+  document.getElementById('btn-guardar-cita').addEventListener('click', () => {
+    const idMascota = document.getElementById('c-mascota').value;
+    const fecha = document.getElementById('c-fecha').value;
+    const hora = document.getElementById('c-hora').value;
+    const motivo = document.getElementById('c-motivo').value.trim();
+
+    if (!idMascota || !fecha || !hora || !motivo) {
+      toast('Por favor, completa todos los campos requeridos.', 'error');
+      return;
+    }
+
+    Citas.save({ idMascota, fecha, hora, motivo });
+    toast('Cita agendada correctamente.', 'success');
+    cerrarModal('modal-cita');
+    renderTabla();
+
+    // Actualizar el badge del sidebar (si existe el elemento)
+    const badge = document.getElementById('sidebar-badge-citas');
+    if (badge) {
+      const pendientes = Citas.getPendientes().length;
+      badge.textContent = pendientes;
+      badge.style.display = pendientes > 0 ? 'inline-flex' : 'none';
+    }
+  });
+
+  // Acciones en Citas (Window global)
+  window.completarCita = id => {
+    Citas.cambiarEstado(id, 'completada');
+    toast('Cita marcada como completada.', 'success');
+    renderTabla();
+    
+    // Preguntar si quiere registrar historial
+    const cita = Citas.getById(id);
+    if (cita) {
+      const m = Mascotas.getById(cita.idMascota);
+      if (confirm(`¿Deseas agregar una entrada al historial clínico de ${m?.nombre ?? 'la mascota'} para esta cita completada?`)) {
+        window.location.href = `/historial?mascota=${cita.idMascota}&nueva=1&motivo=${encodeURIComponent(cita.motivo)}`;
+      }
+    }
+  };
+
+  window.cancelarCita = id => {
+    if (confirm('¿Seguro que deseas cancelar esta cita?')) {
+      Citas.cambiarEstado(id, 'cancelada');
+      toast('Cita cancelada.', 'info');
+      renderTabla();
+    }
+  };
+
+  window.eliminarCita = id => {
+    if (confirm('¿Eliminar esta cita del sistema?')) {
+      Citas.remove(id);
+      toast('Cita eliminada permanentemente.', 'info');
+      renderTabla();
+    }
+  };
+
+  // ── Auto-abrir desde Query Params ───────────────────────
+  const params = new URLSearchParams(window.location.search);
+  const mId = params.get('mascota');
+  if (mId) {
+    const m = Mascotas.getById(mId);
+    if (m) {
+      const cl = Clientes.getById(m.idCliente);
+      if (cl) {
+        // Inicializar modal
+        cargarClientes();
+        document.getElementById('c-cliente').value = cl.id;
+        
+        // Disparar evento change de forma manual para cargar mascotas del cliente
+        const changeEvent = new Event('change');
+        document.getElementById('c-cliente').dispatchEvent(changeEvent);
+        
+        // Seleccionar la mascota específica
+        document.getElementById('c-mascota').value = m.id;
+        
+        // Autocompletar fecha de hoy
+        document.getElementById('c-fecha').value = new Date().toISOString().split('T')[0];
+
+        // Abrir modal
+        abrirModal('modal-cita');
+      }
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  renderTabla();
+</script>

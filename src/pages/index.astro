@@ -1,25 +1,589 @@
 ---
-
-const titulo = "Gimansio de sistema de Control - Inicia Sesión";
+const titulo = "VetCare Pro — Clínica Veterinaria Moderna";
 ---
 
-<!DOCTYPE html>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <meta
+      name="description"
+      content="VetCare Pro — La plataforma más completa para gestionar tu clínica veterinaria. Citas, expedientes, inventario y más. Demo gratuita disponible."
+    />
+    <meta property="og:title" content="VetCare Pro — Clínica Veterinaria Moderna" />
+    <meta property="og:description" content="Gestiona tu clínica veterinaria con la herramienta más potente del mercado." />
 
-</html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{titulo}</title>
-	</head>
-	<body>
-		<h1>{titulo}</h1>
-		<form>
-		<legend> Iniciar Sesión
-		<label  form="text">Correo Electronico</label>
-		<input type="text" name="email" id="email" placeholder="Ingresar Correo Electronido" required>
-		</legend>
-		</form>
-	</body>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <title>{titulo}</title>
+    <link rel="stylesheet" href="/src/assets/CSS/landing.css" />
+  </head>
+
+  <body>
+
+    <!-- ══════════════════════════════════════
+         DEMO RIBBON
+    ══════════════════════════════════════ -->
+    <div class="demo-ribbon">
+      <i class="fa-solid fa-flask"></i>
+      Demo
+    </div>
+
+    <!-- ══════════════════════════════════════
+         NAVBAR
+    ══════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+      <a href="#inicio" class="nav-logo" id="nav-logo-link">
+        <i class="fa-solid fa-paw"></i>
+        VetCare Pro
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#testimonios">Testimonios</a></li>
+        <li><a href="#precios">Precios</a></li>
+        <li><a href="#contacto" class="nav-cta">Solicitar Demo</a></li>
+      </ul>
+
+      <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="#inicio"         onclick="closeMobile()">Inicio</a>
+      <a href="#servicios"      onclick="closeMobile()">Servicios</a>
+      <a href="#como-funciona"  onclick="closeMobile()">Cómo funciona</a>
+      <a href="#testimonios"    onclick="closeMobile()">Testimonios</a>
+      <a href="#precios"        onclick="closeMobile()">Precios</a>
+      <a href="#contacto"       onclick="closeMobile()" class="mobile-cta">Solicitar Demo Gratis</a>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         HERO
+    ══════════════════════════════════════ -->
+    <section class="hero" id="inicio">
+      <div class="hero-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+      </div>
+
+      <div class="hero-content">
+        <div class="hero-badge">
+          <i class="fa-solid fa-star"></i>
+          #1 Sistema Veterinario 2026
+        </div>
+
+        <h1 class="hero-title">
+          La salud de tus<br />
+          <span class="highlight">pacientes al centro</span><br />
+          de todo.
+        </h1>
+
+        <p class="hero-desc">
+          VetCare Pro unifica expedientes médicos, agenda de citas,
+          inventario y facturación en una sola plataforma inteligente,
+          diseñada para veterinarios que quieren trabajar mejor.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#contacto" class="btn-primary" id="hero-cta-primary">
+            <i class="fa-solid fa-rocket"></i>
+            Prueba Gratuita 30 días
+          </a>
+          <a href="#como-funciona" class="btn-outline" id="hero-cta-secondary">
+            <i class="fa-solid fa-play"></i>
+            Ver Demo
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">+2,400</span>
+            <span class="stat-label">Veterinarias activas</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">98%</span>
+            <span class="stat-label">Satisfacción del cliente</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">Soporte en línea</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Card Preview -->
+      <div class="hero-visual">
+        <div class="hero-card-preview">
+          <div class="preview-header">
+            <div class="preview-avatar">🐾</div>
+            <div>
+              <div class="preview-name">Dr. María González</div>
+              <div class="preview-role">Veterinaria Principal</div>
+            </div>
+          </div>
+
+          <div class="preview-stat-row">
+            <div class="preview-stat-box">
+              <div class="num">12</div>
+              <div class="lbl">Citas hoy</div>
+            </div>
+            <div class="preview-stat-box">
+              <div class="num">3</div>
+              <div class="lbl">En espera</div>
+            </div>
+          </div>
+
+          <div class="preview-pet-list">
+            <div class="preview-pet">
+              <i class="fa-solid fa-dog"></i>
+              <div class="preview-pet-info">
+                <div class="name">Max — Golden Retriever</div>
+                <div class="detail">Vacunación · 10:00 am</div>
+              </div>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="preview-pet">
+              <i class="fa-solid fa-cat"></i>
+              <div class="preview-pet-info">
+                <div class="name">Luna — Persa</div>
+                <div class="detail">Revisión anual · 11:30 am</div>
+              </div>
+              <span class="dot dot-yellow"></span>
+            </div>
+            <div class="preview-pet">
+              <i class="fa-solid fa-dove"></i>
+              <div class="preview-pet-info">
+                <div class="name">Pico — Agaporni</div>
+                <div class="detail">Chequeo · 1:00 pm</div>
+              </div>
+              <span class="dot dot-blue"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SERVICIOS
+    ══════════════════════════════════════ -->
+    <section class="services" id="servicios">
+      <div class="centered">
+        <span class="section-label">Nuestros Servicios</span>
+        <h2 class="section-title">Todo lo que tu clínica necesita</h2>
+        <p class="section-desc">
+          Desde la primera consulta hasta el seguimiento post-tratamiento,
+          VetCare Pro te acompaña en cada paso.
+        </p>
+      </div>
+
+      <div class="services-grid">
+        <div class="service-card" id="service-expedientes">
+          <div class="service-icon"><i class="fa-solid fa-file-medical"></i></div>
+          <h3 class="service-title">Expedientes Digitales</h3>
+          <p class="service-desc">
+            Historial clínico completo, vacunas, alergias y diagnósticos
+            organizados por mascota. Acceso instantáneo desde cualquier dispositivo.
+          </p>
+        </div>
+
+        <div class="service-card" id="service-citas">
+          <div class="service-icon"><i class="fa-solid fa-calendar-check"></i></div>
+          <h3 class="service-title">Agenda Inteligente</h3>
+          <p class="service-desc">
+            Programa citas en segundos, envía recordatorios automáticos por
+            WhatsApp o correo y reduce las ausencias a cero.
+          </p>
+        </div>
+
+        <div class="service-card" id="service-inventario">
+          <div class="service-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+          <h3 class="service-title">Inventario & Farmacia</h3>
+          <p class="service-desc">
+            Controla existencias de medicamentos, vacunas y suministros.
+            Alertas automáticas cuando el stock está bajo.
+          </p>
+        </div>
+
+        <div class="service-card" id="service-facturacion">
+          <div class="service-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <h3 class="service-title">Facturación Electrónica</h3>
+          <p class="service-desc">
+            Genera facturas y cobros en segundos. Compatible con los
+            principales métodos de pago y normativas fiscales.
+          </p>
+        </div>
+
+        <div class="service-card" id="service-reportes">
+          <div class="service-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <h3 class="service-title">Reportes & Estadísticas</h3>
+          <p class="service-desc">
+            Visualiza el desempeño de tu clínica con dashboards en tiempo
+            real. Toma decisiones basadas en datos, no en suposiciones.
+          </p>
+        </div>
+
+        <div class="service-card" id="service-telemedicina">
+          <div class="service-icon"><i class="fa-solid fa-video"></i></div>
+          <h3 class="service-title">Telemedicina</h3>
+          <p class="service-desc">
+            Realiza consultas virtuales con dueños de mascotas sin que
+            tengan que salir de casa. Amplía tu alcance sin límites.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         CÓMO FUNCIONA
+    ══════════════════════════════════════ -->
+    <section class="features" id="como-funciona">
+      <span class="section-label">Proceso simple</span>
+      <h2 class="section-title">Empieza en minutos, no en semanas</h2>
+      <p class="section-desc">
+        Configuración guiada paso a paso. Sin instalaciones complicadas,
+        sin conocimientos técnicos requeridos.
+      </p>
+
+      <div class="features-wrapper">
+        <div class="features-steps">
+          <div class="step" id="step-1">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Crea tu cuenta en 60 segundos</h3>
+              <p>
+                Regístrate con tu correo, ingresa los datos básicos de tu
+                clínica y accede de inmediato. Sin tarjeta de crédito.
+              </p>
+            </div>
+          </div>
+
+          <div class="step" id="step-2">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Importa tus datos existentes</h3>
+              <p>
+                Sube tu lista de clientes y mascotas desde Excel o CSV.
+                Nuestro sistema los organiza automáticamente.
+              </p>
+            </div>
+          </div>
+
+          <div class="step" id="step-3">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Personaliza tu flujo de trabajo</h3>
+              <p>
+                Configura los servicios que ofreces, precios, horarios y
+                plantillas de mensajes en minutos.
+              </p>
+            </div>
+          </div>
+
+          <div class="step" id="step-4">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>¡Listo! Tu clínica al siguiente nivel</h3>
+              <p>
+                Empieza a agendar, facturar y gestionar pacientes desde el
+                primer día. Soporte humano disponible 24/7.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual mockup -->
+        <div class="features-image-wrap">
+          <div class="mock-row">
+            <i class="mock-icon fa-solid fa-dog"></i>
+            <div class="mock-info">
+              <h4>Rex — Labrador, 3 años</h4>
+              <p>Última visita: hace 2 días · Vacunas al día</p>
+            </div>
+            <span class="mock-badge badge-ok">Saludable</span>
+          </div>
+
+          <div class="mock-row">
+            <i class="mock-icon fa-solid fa-cat"></i>
+            <div class="mock-info">
+              <h4>Mittens — Siamés, 7 años</h4>
+              <p>Próxima cita: mañana · Revisión renal</p>
+            </div>
+            <span class="mock-badge badge-warn">Pendiente</span>
+          </div>
+
+          <div class="mock-row">
+            <i class="mock-icon fa-solid fa-horse"></i>
+            <div class="mock-info">
+              <h4>Thunder — Cuarto de Milla, 5 años</h4>
+              <p>Desparasitación completada hoy</p>
+            </div>
+            <span class="mock-badge badge-info">Tratamiento</span>
+          </div>
+
+          <div class="mock-row">
+            <i class="mock-icon fa-solid fa-fish"></i>
+            <div class="mock-info">
+              <h4>Nemo — Pez payaso, 2 años</h4>
+              <p>Revisión de acuario programada</p>
+            </div>
+            <span class="mock-badge badge-ok">Ok</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TESTIMONIOS
+    ══════════════════════════════════════ -->
+    <section class="testimonials" id="testimonios">
+      <div class="centered">
+        <span class="section-label">Testimonios</span>
+        <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+        <p class="section-desc">
+          Más de 2,400 clínicas veterinarias confían en VetCare Pro
+          para gestionar su práctica diaria.
+        </p>
+      </div>
+
+      <div class="testi-grid">
+        <div class="testi-card" id="testi-1">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">
+            "Desde que usamos VetCare Pro, redujimos las ausencias en un 60%.
+            Los recordatorios automáticos son un cambio de vida para nuestra clínica."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar av-teal">MR</div>
+            <div>
+              <div class="testi-name">Dr. Miguel Rodríguez</div>
+              <div class="testi-role">Clínica VetSalud, Ciudad de México</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-card" id="testi-2">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">
+            "El sistema de inventario nos ahorró miles de pesos en medicamentos
+            vencidos. Ahora siempre sabemos exactamente qué tenemos en stock."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar av-mint">LC</div>
+            <div>
+              <div class="testi-name">Dra. Laura Castro</div>
+              <div class="testi-role">AnimalCare, Guadalajara</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-card" id="testi-3">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">
+            "Migré de 3 sistemas distintos a VetCare Pro en un solo fin de semana.
+            El soporte fue excepcional y ahora todo está en un solo lugar."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar av-gold">JP</div>
+            <div>
+              <div class="testi-name">Dr. Juan Pérez</div>
+              <div class="testi-role">PetCare Clinic, Monterrey</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         PRECIOS
+    ══════════════════════════════════════ -->
+    <section class="pricing" id="precios">
+      <div class="centered">
+        <span class="section-label">Planes & Precios</span>
+        <h2 class="section-title">Elige el plan para tu clínica</h2>
+        <p class="section-desc">
+          Sin contratos a largo plazo. Cancela cuando quieras.
+          Todos los planes incluyen 30 días de prueba gratuita.
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Starter -->
+        <div class="price-card" id="plan-starter">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">$299<span>/mes</span></div>
+          <div class="plan-period">Facturado mensualmente</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> Hasta 2 veterinarios</li>
+            <li><i class="fa-solid fa-check"></i> 500 pacientes activos</li>
+            <li><i class="fa-solid fa-check"></i> Agenda & citas</li>
+            <li><i class="fa-solid fa-check"></i> Expedientes digitales</li>
+            <li class="disabled"><i class="fa-solid fa-xmark"></i> Inventario avanzado</li>
+            <li class="disabled"><i class="fa-solid fa-xmark"></i> Telemedicina</li>
+            <li class="disabled"><i class="fa-solid fa-xmark"></i> Reportes personalizados</li>
+          </ul>
+          <a href="#contacto" class="btn-outline" id="btn-starter">Empezar gratis</a>
+        </div>
+
+        <!-- Pro (Popular) -->
+        <div class="price-card popular" id="plan-pro">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">$699<span>/mes</span></div>
+          <div class="plan-period">Facturado mensualmente</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> Hasta 8 veterinarios</li>
+            <li><i class="fa-solid fa-check"></i> Pacientes ilimitados</li>
+            <li><i class="fa-solid fa-check"></i> Agenda & citas</li>
+            <li><i class="fa-solid fa-check"></i> Expedientes digitales</li>
+            <li><i class="fa-solid fa-check"></i> Inventario avanzado</li>
+            <li><i class="fa-solid fa-check"></i> Telemedicina (10 sesiones)</li>
+            <li class="disabled"><i class="fa-solid fa-xmark"></i> Reportes personalizados</li>
+          </ul>
+          <a href="#contacto" class="btn-primary" id="btn-pro">Empezar gratis</a>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="price-card" id="plan-enterprise">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price">$1,499<span>/mes</span></div>
+          <div class="plan-period">Facturado mensualmente</div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> Veterinarios ilimitados</li>
+            <li><i class="fa-solid fa-check"></i> Pacientes ilimitados</li>
+            <li><i class="fa-solid fa-check"></i> Agenda & citas</li>
+            <li><i class="fa-solid fa-check"></i> Expedientes digitales</li>
+            <li><i class="fa-solid fa-check"></i> Inventario avanzado</li>
+            <li><i class="fa-solid fa-check"></i> Telemedicina ilimitada</li>
+            <li><i class="fa-solid fa-check"></i> Reportes personalizados</li>
+          </ul>
+          <a href="#contacto" class="btn-outline" id="btn-enterprise">Contactar ventas</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         CTA BANNER
+    ══════════════════════════════════════ -->
+    <div class="cta-banner" id="contacto">
+      <div class="cta-text">
+        <h2>¿Listo para transformar tu clínica?</h2>
+        <p>Únete a +2,400 veterinarios que ya trabajan más inteligente con VetCare Pro.</p>
+      </div>
+      <a href="#inicio" class="btn-primary" id="cta-banner-btn">
+        <i class="fa-solid fa-rocket"></i>
+        Comenzar ahora — Es gratis
+      </a>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         FOOTER
+    ══════════════════════════════════════ -->
+    <footer>
+      <div class="footer-grid">
+        <!-- Brand -->
+        <div class="footer-brand">
+          <a href="#inicio" class="nav-logo">
+            <i class="fa-solid fa-paw"></i>
+            VetCare Pro
+          </a>
+          <p>
+            La plataforma veterinaria más completa de América Latina.
+            Diseñada por veterinarios, para veterinarios.
+          </p>
+          <div class="footer-socials">
+            <a href="#" class="social-btn" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="social-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="social-btn" aria-label="Twitter/X"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="social-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="footer-col">
+          <h4>Producto</h4>
+          <ul>
+            <li><a href="#servicios">Características</a></li>
+            <li><a href="#precios">Precios</a></li>
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#testimonios">Testimonios</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="#">Sobre nosotros</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Contacto</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacidad</a></li>
+            <li><a href="#">Términos de uso</a></li>
+            <li><a href="#">Cookies</a></li>
+            <li><a href="#">RGPD</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 VetCare Pro. Todos los derechos reservados.</span>
+        <span>Hecho con <i class="fa-solid fa-heart"></i> para el bienestar animal</span>
+      </div>
+    </footer>
+
+    <!-- ══════════════════════════════════════
+         JS — Hamburger & Scroll
+    ══════════════════════════════════════ -->
+    <script>
+      const hamburger   = document.getElementById('hamburger');
+      const mobileMenu  = document.getElementById('mobile-menu');
+
+      hamburger?.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileMenu?.classList.toggle('open');
+      });
+
+      function closeMobile() {
+        hamburger?.classList.remove('open');
+        mobileMenu?.classList.remove('open');
+      }
+
+      // Navbar scroll shadow
+      window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        if (nav) {
+          nav.style.boxShadow = window.scrollY > 20
+            ? '0 4px 30px rgba(0,0,0,.35)'
+            : 'none';
+        }
+      });
+    </script>
+
+  </body>
 </html>

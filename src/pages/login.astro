@@ -1,0 +1,164 @@
+---
+// login.astro — VetCare Pro
+const titulo = "Iniciar sesión";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Login — VetCare Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="/src/assets/CSS/dashboard.css" />
+    <link rel="stylesheet" href="/src/assets/CSS/forms.css" />
+  </head>
+
+  <body>
+    <div class="login-page">
+      <div class="login-box">
+
+        <!-- Logo -->
+        <div class="login-logo">
+          <i class="fa-solid fa-paw"></i>
+          VetCare Pro
+        </div>
+        <p class="login-subtitle">Sistema de Gestión Veterinaria — Demo</p>
+
+        <!-- Error -->
+        <div class="login-error" id="login-error">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="login-error-msg">Correo o contraseña incorrectos.</span>
+        </div>
+
+        <!-- Formulario -->
+        <form class="login-form" id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <div class="input-icon-wrap">
+              <i class="fa-solid fa-envelope"></i>
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                placeholder="usuario@vetcare.demo"
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Contraseña</label>
+            <div class="input-icon-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                id="password"
+                type="password"
+                class="form-control"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="btn-toggle-pass" id="toggle-pass" aria-label="Ver contraseña">
+                <i class="fa-solid fa-eye" id="pass-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-submit" style="width:100%; justify-content:center; margin-top:.3rem;">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Iniciar sesión
+          </button>
+        </form>
+
+        <!-- Credenciales de demo -->
+        <div class="demo-credentials">
+          <p><i class="fa-solid fa-flask"></i> Credenciales de demo (clic para autocompletar)</p>
+          <div class="demo-cred-item" data-email="admin@vetcare.demo" data-pass="demo1234">
+            <span><i class="fa-solid fa-user-shield" style="color:var(--teal-300); margin-right:.4rem;"></i>Administrador</span>
+            <code>demo1234</code>
+          </div>
+          <div class="demo-cred-item" data-email="vet@vetcare.demo" data-pass="demo1234">
+            <span><i class="fa-solid fa-stethoscope" style="color:var(--mint); margin-right:.4rem;"></i>Veterinario</span>
+            <code>demo1234</code>
+          </div>
+        </div>
+
+        <!-- Volver al inicio -->
+        <p style="text-align:center; margin-top:1.2rem;">
+          <a href="/" style="font-size:.82rem; color:rgba(255,255,255,.4); text-decoration:none; transition:.2s;"
+             onmouseover="this.style.color='var(--teal-300)'" onmouseout="this.style.color='rgba(255,255,255,.4)'">
+            <i class="fa-solid fa-arrow-left"></i> Volver a la página principal
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <script type="module">
+      import { login, estaAutenticado } from '/src/assets/JS/auth.js';
+
+      // Si ya está autenticado, ir al dashboard
+      if (estaAutenticado()) {
+        window.location.href = '/dashboard';
+      }
+
+      const form      = document.getElementById('login-form');
+      const errorBox  = document.getElementById('login-error');
+      const errorMsg  = document.getElementById('login-error-msg');
+      const btnSubmit = document.getElementById('btn-submit');
+
+      // Toggle contraseña
+      document.getElementById('toggle-pass')?.addEventListener('click', () => {
+        const inp  = document.getElementById('password');
+        const icon = document.getElementById('pass-icon');
+        const show = inp.type === 'password';
+        inp.type  = show ? 'text' : 'password';
+        icon.className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+      });
+
+      // Autocompletar credenciales demo
+      document.querySelectorAll('.demo-cred-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.getElementById('email').value    = item.dataset.email;
+          document.getElementById('password').value = item.dataset.pass;
+          errorBox.classList.remove('visible');
+        });
+      });
+
+      // Submit
+      form?.addEventListener('submit', async e => {
+        e.preventDefault();
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+          errorMsg.textContent = 'Por favor completa todos los campos.';
+          errorBox.classList.add('visible');
+          return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando…';
+
+        // Simular latencia de red
+        await new Promise(r => setTimeout(r, 600));
+
+        const result = login(email, password);
+        if (result.ok) {
+          btnSubmit.innerHTML = '<i class="fa-solid fa-circle-check"></i> ¡Bienvenido!';
+          setTimeout(() => { window.location.href = '/dashboard'; }, 500);
+        } else {
+          errorMsg.textContent = result.error;
+          errorBox.classList.add('visible');
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión';
+        }
+      });
+    </script>
+  </body>
+</html>

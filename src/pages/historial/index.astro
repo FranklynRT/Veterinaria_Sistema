@@ -1,0 +1,328 @@
+---
+// historial/index.astro — VetCare Pro
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Historial Clínico" section="historial">
+
+  <div class="page-header">
+    <div class="page-header-text">
+      <h1>Expediente Clínico</h1>
+      <p>Historial médico completo y registro de consultas de los pacientes</p>
+    </div>
+    <div class="page-actions" id="action-nueva-consulta" style="display:none;">
+      <button class="btn btn-primary" id="btn-nueva-consulta">
+        <i class="fa-solid fa-notes-medical"></i>
+        Nueva consulta
+      </button>
+    </div>
+  </div>
+
+  <!-- Selector de Mascota -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-body" style="display:flex; gap:1.2rem; flex-wrap:wrap; align-items:center;">
+      <div style="flex:1; min-width:250px;">
+        <label class="form-label" for="select-mascota" style="margin-bottom:.4rem;">Seleccionar Mascota</label>
+        <select id="select-mascota" class="form-control">
+          <option value="">Buscar mascota por nombre o dueño…</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido del expediente -->
+  <div id="expediente-wrap" class="hidden">
+    <!-- Información detallada del paciente -->
+    <div class="card" style="margin-bottom:1.5rem; background:linear-gradient(to right, rgba(255,255,255,.01), rgba(255,255,255,.02));">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-circle-info" style="color:var(--mint); margin-right:.5rem;"></i>Información del paciente</h2>
+      </div>
+      <div class="card-body">
+        <div class="detail-grid">
+          <div class="detail-field">
+            <label>Nombre Mascota</label>
+            <span id="pet-nombre" style="font-weight:700; color:var(--mint);">—</span>
+          </div>
+          <div class="detail-field">
+            <label>Especie / Raza</label>
+            <span id="pet-especie-raza">—</span>
+          </div>
+          <div class="detail-field">
+            <label>Edad y Peso</label>
+            <span id="pet-edad-peso">—</span>
+          </div>
+          <div class="detail-field">
+            <label>Dueño / Contacto</label>
+            <span id="pet-dueno">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline del Historial -->
+    <div class="card">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-clock-rotate-left" style="color:var(--teal-300); margin-right:.5rem;"></i>Línea de tiempo de consultas</h2>
+      </div>
+      <div class="card-body" style="position:relative; padding-left:1.5rem; padding-right:1.5rem;">
+        
+        <!-- Timeline vertical line style in dashboard.css is styled or inline styling here -->
+        <div id="timeline-container" style="position:relative; padding-left:1.5rem; border-left: 2px solid rgba(255,255,255,.06); display:flex; flex-direction:column; gap:2rem;">
+          <!-- Items renderizados dinámicamente -->
+        </div>
+
+        <div id="empty-timeline" class="empty-state hidden" style="padding: 2rem 0;">
+          <i class="fa-solid fa-notes-medical" style="font-size: 2.2rem; opacity: .4; margin-bottom: 1rem;"></i>
+          <p>Esta mascota no tiene consultas registradas aún.</p>
+          <button class="btn btn-secondary btn-sm" id="btn-nueva-consulta-empty" style="margin-top:.5rem;">Agregar primera consulta</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado Inicial Vacío -->
+  <div id="estado-inicial" class="card empty-state" style="padding:4rem 2rem;">
+    <i class="fa-solid fa-folder-open"></i>
+    <h2>Ningún paciente seleccionado</h2>
+    <p>Utiliza el buscador de arriba para seleccionar una mascota y ver su historial clínico completo.</p>
+  </div>
+
+  <!-- ══ MODAL NUEVA CONSULTA ══ -->
+  <div class="modal-wrapper" id="modal-consulta">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Registrar Entrada de Historial Clínico</span>
+        <button class="modal-close" id="modal-consulta-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:.85rem; color:rgba(255,255,255,.5); margin-bottom:1.2rem;">
+          Paciente: <strong id="consulta-paciente" style="color:var(--mint);"></strong>
+        </p>
+        
+        <form id="form-consulta" novalidate>
+          <div class="form-grid">
+            <!-- Síntomas -->
+            <div class="form-group full">
+              <label class="form-label" for="h-sintomas">Síntomas / Motivo de consulta <span class="required">*</span></label>
+              <textarea id="h-sintomas" class="form-control" rows="3" placeholder="Ej: Vómito constante desde ayer, decaimiento..." required style="resize:vertical; min-height:80px;"></textarea>
+            </div>
+
+            <!-- Diagnóstico -->
+            <div class="form-group full">
+              <label class="form-label" for="h-diagnostico">Diagnóstico <span class="required">*</span></label>
+              <textarea id="h-diagnostico" class="form-control" rows="3" placeholder="Ej: Infección gastrointestinal leve por ingesta inadecuada..." required style="resize:vertical; min-height:80px;"></textarea>
+            </div>
+
+            <!-- Tratamiento -->
+            <div class="form-group full">
+              <label class="form-label" for="h-tratamiento">Tratamiento / Receta <span class="required">*</span></label>
+              <textarea id="h-tratamiento" class="form-control" rows="4" placeholder="Ej: 1. Suero de hidratación oral. 2. Antibiótico X por 5 días..." required style="resize:vertical; min-height:90px;"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-consulta-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="btn-guardar-consulta">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar Consulta
+        </button>
+      </div>
+    </div>
+  </div>
+
+</DashboardLayout>
+
+<script type="module">
+  import { Historial, Mascotas, Clientes } from '/src/assets/JS/db.js';
+  import { formatFecha, especieIcon, abrirModal, cerrarModal, toast } from '/src/assets/JS/utils.js';
+
+  let selectedMascotaId = null;
+
+  // Cargar mascotas en el select con su dueño para identificar
+  function cargarMascotasDropdown() {
+    const mascotas = Mascotas.getAll();
+    const clientes = Clientes.getAll();
+    const select = document.getElementById('select-mascota');
+    
+    select.innerHTML = '<option value="">Buscar mascota por nombre o dueño…</option>';
+    
+    mascotas.forEach(m => {
+      const cl = clientes.find(c => c.id === m.idCliente) || { nombre: 'Sin dueño' };
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.nombre} (${m.especie} - Dueño: ${cl.nombre})`;
+      select.appendChild(opt);
+    });
+  }
+
+  // Cargar expediente completo de una mascota
+  function cargarExpediente(mascotaId) {
+    selectedMascotaId = mascotaId;
+    if (!mascotaId) {
+      document.getElementById('expediente-wrap').classList.add('hidden');
+      document.getElementById('estado-inicial').classList.remove('hidden');
+      document.getElementById('action-nueva-consulta').style.display = 'none';
+      return;
+    }
+
+    const m = Mascotas.getById(mascotaId);
+    if (!m) return;
+
+    const cl = Clientes.getById(m.idCliente) || { nombre: '—', telefono: '—', email: '—' };
+
+    // Mostrar contenedor y ocultar estado inicial
+    document.getElementById('estado-inicial').classList.add('hidden');
+    document.getElementById('expediente-wrap').classList.remove('hidden');
+    document.getElementById('action-nueva-consulta').style.display = 'block';
+
+    // Llenar información de mascota
+    document.getElementById('pet-nombre').textContent = m.nombre;
+    document.getElementById('pet-especie-raza').innerHTML = `
+      <span class="pet-chip" style="margin:0;"><i class="fa-solid ${especieIcon(m.especie)}"></i>${m.especie}</span>
+      <span style="opacity:.8; margin-left:.3rem;">${m.raza || 'Sin raza definida'}</span>
+    `;
+    document.getElementById('pet-edad-peso').textContent = `${m.edad} año${m.edad !== 1 ? 's' : ''} · ${m.peso ? m.peso + ' kg' : 'Sin registro de peso'}`;
+    document.getElementById('pet-dueno').innerHTML = `
+      <div style="font-weight:600; color:var(--teal-300);">${cl.nombre}</div>
+      <div style="font-size:.78rem; opacity:.7; margin-top:.15rem;">
+        <i class="fa-solid fa-phone" style="margin-right:.2rem;"></i>${cl.telefono} · 
+        <i class="fa-solid fa-envelope" style="margin-right:.2rem;"></i>${cl.email}
+      </div>
+    `;
+
+    // Renderizar Timeline
+    renderTimeline(mascotaId);
+  }
+
+  // Renderizar historial de consultas
+  function renderTimeline(mascotaId) {
+    const list = Historial.getByMascota(mascotaId);
+    const container = document.getElementById('timeline-container');
+    const emptyState = document.getElementById('empty-timeline');
+
+    if (list.length === 0) {
+      container.innerHTML = '';
+      container.style.display = 'none';
+      emptyState.classList.remove('hidden');
+      return;
+    }
+
+    container.style.display = 'flex';
+    emptyState.classList.add('hidden');
+
+    container.innerHTML = list.map(h => `
+      <div style="position:relative;">
+        <!-- Puntito en la linea de tiempo -->
+        <div style="position:absolute; left:-1.9rem; top:.3rem; width:12px; height:12px; border-radius:50%; background:var(--teal-300); border: 2px solid var(--teal-950); box-shadow: 0 0 0 4px rgba(45,212,191,.15);"></div>
+        
+        <!-- Tarjeta de Consulta -->
+        <div class="card" style="padding:1.2rem; background:rgba(255,255,255,.02); border-color:rgba(255,255,255,.05); margin:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; margin-bottom:.8rem; border-bottom:1px solid rgba(255,255,255,.04); padding-bottom:.5rem;">
+            <div style="font-weight:700; color:var(--teal-300); font-size:.92rem;">
+              <i class="fa-solid fa-user-md" style="margin-right:.3rem;"></i>Consulta Médica
+            </div>
+            <div style="font-size:.78rem; opacity:.6;"><i class="fa-regular fa-calendar" style="margin-right:.3rem;"></i>${formatFecha(h.fecha)}</div>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:.8rem; font-size:.85rem;">
+            <div>
+              <strong style="color:var(--mint); display:block; margin-bottom:.2rem;">Síntomas / Motivo:</strong>
+              <p style="margin:0; opacity:.95; line-height:1.4;">${h.sintomas}</p>
+            </div>
+            <div>
+              <strong style="color:var(--gold); display:block; margin-bottom:.2rem;">Diagnóstico:</strong>
+              <p style="margin:0; opacity:.95; line-height:1.4;">${h.diagnostico}</p>
+            </div>
+            <div>
+              <strong style="color:var(--teal-300); display:block; margin-bottom:.2rem;">Tratamiento / Receta:</strong>
+              <p style="margin:0; opacity:.95; line-height:1.4; white-space:pre-line;">${h.tratamiento}</p>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:.8rem; border-top:1px solid rgba(255,255,255,.02); padding-top:.5rem;">
+            <button class="btn btn-ghost btn-sm" onclick="eliminarConsulta('${h.id}')" title="Eliminar registro" style="color:var(--danger); padding:.2rem .5rem;">
+              <i class="fa-solid fa-trash-can" style="margin-right:.2rem;"></i>Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Eliminar Consulta (Window global)
+  window.eliminarConsulta = id => {
+    if (confirm('¿Deseas eliminar permanentemente esta entrada de historial clínico?')) {
+      Historial.remove(id);
+      toast('Consulta eliminada del historial.', 'info');
+      renderTimeline(selectedMascotaId);
+    }
+  };
+
+  // Cambio de selección de mascota
+  document.getElementById('select-mascota').addEventListener('change', e => {
+    cargarExpediente(e.target.value);
+  });
+
+  // Modales
+  const abrirModalConsulta = () => {
+    const m = Mascotas.getById(selectedMascotaId);
+    if (!m) return;
+    document.getElementById('consulta-paciente').textContent = m.nombre;
+    document.getElementById('form-consulta').reset();
+    
+    // Si viene de una cita y pre-cargó síntomas
+    const params = new URLSearchParams(window.location.search);
+    const motivo = params.get('motivo');
+    if (motivo) {
+      document.getElementById('h-sintomas').value = motivo;
+    }
+    
+    abrirModal('modal-consulta');
+  };
+
+  document.getElementById('btn-nueva-consulta').addEventListener('click', abrirModalConsulta);
+  document.getElementById('btn-nueva-consulta-empty').addEventListener('click', abrirModalConsulta);
+
+  ['modal-consulta-close', 'modal-consulta-cancel'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', () => cerrarModal('modal-consulta'));
+  });
+
+  document.getElementById('btn-guardar-consulta').addEventListener('click', () => {
+    const sintomas = document.getElementById('h-sintomas').value.trim();
+    const diagnostico = document.getElementById('h-diagnostico').value.trim();
+    const tratamiento = document.getElementById('h-tratamiento').value.trim();
+
+    if (!sintomas || !diagnostico || !tratamiento) {
+      toast('Por favor, completa todos los campos del registro clínico.', 'error');
+      return;
+    }
+
+    Historial.save({
+      idMascota: selectedMascotaId,
+      sintomas,
+      diagnostico,
+      tratamiento
+    });
+
+    toast('Nueva consulta registrada en el expediente.', 'success');
+    cerrarModal('modal-consulta');
+    renderTimeline(selectedMascotaId);
+  });
+
+  // ── Auto-cargar e inicializar desde Query Params ────────────────
+  cargarMascotasDropdown();
+
+  const params = new URLSearchParams(window.location.search);
+  const mId = params.get('mascota');
+  if (mId) {
+    document.getElementById('select-mascota').value = mId;
+    cargarExpediente(mId);
+
+    // Auto-abrir modal de consulta si nueva=1 está en la URL
+    if (params.get('nueva') === '1') {
+      abrirModalConsulta();
+    }
+  }
+</script>

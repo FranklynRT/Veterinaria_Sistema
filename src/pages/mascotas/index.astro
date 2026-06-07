@@ -1,0 +1,318 @@
+---
+// mascotas/index.astro — VetCare Pro
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Mascotas" section="mascotas">
+
+  <div class="page-header">
+    <div class="page-header-text">
+      <h1>Mascotas</h1>
+      <p>Administra los expedientes y datos de todos los pacientes peludos</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" id="btn-nueva-mascota">
+        <i class="fa-solid fa-paw"></i>
+        Nueva mascota
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar de búsqueda y filtros -->
+  <div class="table-toolbar" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+    <div class="search-box" style="flex:1; min-width:250px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="Buscar por nombre o raza de mascota…" />
+    </div>
+    
+    <div style="display:flex; gap:.5rem; align-items:center;">
+      <span class="text-muted" style="font-size:.82rem;">Especie:</span>
+      <select id="filter-especie" class="form-control" style="width:auto; padding-top:.4rem; padding-bottom:.4rem; min-width:130px;">
+        <option value="">Todas</option>
+        <option>Perro</option>
+        <option>Gato</option>
+        <option>Ave</option>
+        <option>Conejo</option>
+        <option>Pez</option>
+        <option>Caballo</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <span id="count-label" class="text-muted" style="margin-left:auto;"></span>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <div class="data-table-wrap">
+      <table class="data-table" id="mascotas-table">
+        <thead>
+          <tr>
+            <th>Mascota</th>
+            <th>Especie / Raza</th>
+            <th>Dueño</th>
+            <th>Edad</th>
+            <th>Peso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="mascotas-tbody"></tbody>
+      </table>
+    </div>
+    <div id="empty-mascotas" class="empty-state hidden">
+      <i class="fa-solid fa-paw"></i>
+      <p>No se encontraron mascotas que coincidan con la búsqueda.</p>
+    </div>
+  </div>
+
+  <!-- ══ MODAL CREAR / EDITAR MASCOTA ══ -->
+  <div class="modal-wrapper" id="modal-mascota">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-mascota-title">Nueva mascota</span>
+        <button class="modal-close" id="modal-mascota-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-mascota" novalidate>
+          <input type="hidden" id="mascota-id" />
+          
+          <div class="form-grid form-grid-2">
+            <!-- Dueño / Cliente -->
+            <div class="form-group full" id="grupo-cliente">
+              <label class="form-label" for="m-cliente">Dueño (Cliente) <span class="required">*</span></label>
+              <select id="m-cliente" class="form-control" required>
+                <option value="">Seleccionar dueño…</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="m-nombre">Nombre de mascota <span class="required">*</span></label>
+              <input id="m-nombre" type="text" class="form-control" placeholder="Ej: Max" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="m-especie">Especie <span class="required">*</span></label>
+              <select id="m-especie" class="form-control" required>
+                <option value="">Seleccionar…</option>
+                <option>Perro</option>
+                <option>Gato</option>
+                <option>Ave</option>
+                <option>Conejo</option>
+                <option>Pez</option>
+                <option>Caballo</option>
+                <option>Otro</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="m-raza">Raza</label>
+              <input id="m-raza" type="text" class="form-control" placeholder="Ej: Golden Retriever" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="m-edad">Edad (años) <span class="required">*</span></label>
+              <input id="m-edad" type="number" class="form-control" placeholder="2" min="0" max="40" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="m-peso">Peso (kg)</label>
+              <input id="m-peso" type="number" class="form-control" placeholder="5.0" step="0.1" min="0" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-mascota-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="btn-guardar-mascota">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar mascota
+        </button>
+      </div>
+    </div>
+  </div>
+
+</DashboardLayout>
+
+<script type="module">
+  import { Mascotas, Clientes } from '/src/assets/JS/db.js';
+  import { especieIcon, abrirModal, cerrarModal, toast } from '/src/assets/JS/utils.js';
+
+  let editId = null;
+
+  // Cargar lista de clientes en el dropdown del formulario
+  function cargarClientesDropdown() {
+    const clientes = Clientes.getAll();
+    const select = document.getElementById('m-cliente');
+    
+    // Guardar opción inicial
+    select.innerHTML = '<option value="">Seleccionar dueño…</option>';
+    
+    clientes.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.nombre;
+      select.appendChild(opt);
+    });
+  }
+
+  // ── Renderizar tabla ──────────────────────────────────────
+  function renderTabla() {
+    const listaMascotas = Mascotas.getAll();
+    const listaClientes = Clientes.getAll();
+    const tbody = document.getElementById('mascotas-tbody');
+    const empty = document.getElementById('empty-mascotas');
+    const countLabel = document.getElementById('count-label');
+
+    const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+    const especieVal = document.getElementById('filter-especie').value;
+
+    // Filtrar
+    const filtrados = listaMascotas.filter(m => {
+      const matchesSearch = m.nombre.toLowerCase().includes(searchVal) || 
+                            (m.raza && m.raza.toLowerCase().includes(searchVal));
+      const matchesEspecie = especieVal === '' || m.especie === especieVal;
+      return matchesSearch && matchesEspecie;
+    });
+
+    countLabel.textContent = `${filtrados.length} mascota${filtrados.length !== 1 ? 's' : ''}`;
+
+    if (filtrados.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    tbody.innerHTML = filtrados.map(m => {
+      const cl = listaClientes.find(c => c.id === m.idCliente) || { nombre: '—', id: '' };
+      const linkDueno = cl.id 
+        ? `<a href="/clientes/detalle?id=${cl.id}" style="color:var(--teal-300); text-decoration:none; font-weight:500;">${cl.nombre}</a>`
+        : '—';
+
+      return `
+        <tr>
+          <td>
+            <div class="cell-avatar">
+              <div class="avatar" style="background:linear-gradient(135deg,var(--mint),#22c99a);color:var(--teal-900); font-weight:700;">
+                ${m.nombre[0]}
+              </div>
+              <div>
+                <div class="cell-name">${m.nombre}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="pet-chip">
+              <i class="fa-solid ${especieIcon(m.especie)}"></i>
+              ${m.especie}
+            </span>
+            <span style="font-size:.82rem; opacity:.7; margin-left:.3rem;">${m.raza || ''}</span>
+          </td>
+          <td>${linkDueno}</td>
+          <td>${m.edad} año${m.edad !== 1 ? 's' : ''}</td>
+          <td>${m.peso ? m.peso + ' kg' : '—'}</td>
+          <td>
+            <div class="cell-actions">
+              <a href="/historial?mascota=${m.id}" class="btn btn-ghost btn-icon btn-sm" title="Ver historial clínico">
+                <i class="fa-solid fa-file-medical" style="color:var(--teal-300);"></i>
+              </a>
+              <a href="/citas?mascota=${m.id}" class="btn btn-ghost btn-icon btn-sm" title="Agendar cita">
+                <i class="fa-solid fa-calendar-plus" style="color:var(--gold);"></i>
+              </a>
+              <button class="btn btn-ghost btn-icon btn-sm" title="Editar" onclick="editarMascota('${m.id}')">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-ghost btn-icon btn-sm" title="Eliminar" onclick="eliminarMascota('${m.id}')">
+                <i class="fa-solid fa-trash" style="color:var(--danger);"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Escuchar filtros
+  document.getElementById('search-input').addEventListener('input', renderTabla);
+  document.getElementById('filter-especie').addEventListener('change', renderTabla);
+
+  // ── Modal Mascota ─────────────────────────────────────────
+  document.getElementById('btn-nueva-mascota').addEventListener('click', () => {
+    editId = null;
+    document.getElementById('modal-mascota-title').textContent = 'Nueva mascota';
+    document.getElementById('form-mascota').reset();
+    document.getElementById('mascota-id').value = '';
+    document.getElementById('grupo-cliente').style.display = 'block'; // Mostrar selector de dueño
+    cargarClientesDropdown();
+    abrirModal('modal-mascota');
+  });
+
+  ['modal-mascota-close', 'modal-mascota-cancel'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', () => cerrarModal('modal-mascota'));
+  });
+
+  document.getElementById('btn-guardar-mascota').addEventListener('click', () => {
+    const id = document.getElementById('mascota-id').value;
+    const nombre = document.getElementById('m-nombre').value.trim();
+    const especie = document.getElementById('m-especie').value;
+    const raza = document.getElementById('m-raza').value.trim();
+    const edad = Number(document.getElementById('m-edad').value);
+    const peso = parseFloat(document.getElementById('m-peso').value) || 0;
+
+    if (!nombre || !especie || isNaN(edad) || edad < 0) {
+      toast('Por favor, completa los campos requeridos y asegúrate de que la edad sea válida.', 'error');
+      return;
+    }
+
+    if (id) {
+      // Editar
+      const mExistente = Mascotas.getById(id);
+      if (mExistente) {
+        Mascotas.update(id, { nombre, especie, raza, edad, peso });
+        toast('Mascota actualizada correctamente.', 'success');
+      }
+    } else {
+      // Crear nueva mascota
+      const idCliente = document.getElementById('m-cliente').value;
+      if (!idCliente) {
+        toast('Debes seleccionar un dueño para la mascota.', 'error');
+        return;
+      }
+      Mascotas.save({ idCliente, nombre, especie, raza, edad, peso });
+      toast(`${nombre} se ha registrado correctamente.`, 'success');
+    }
+
+    cerrarModal('modal-mascota');
+    renderTabla();
+  });
+
+  // ── Editar / Eliminar (globales en window) ────────────────
+  window.editarMascota = id => {
+    const m = Mascotas.getById(id);
+    if (!m) return;
+    editId = id;
+    document.getElementById('modal-mascota-title').textContent = 'Editar mascota';
+    document.getElementById('mascota-id').value = m.id;
+    document.getElementById('m-nombre').value = m.nombre;
+    document.getElementById('m-especie').value = m.especie;
+    document.getElementById('m-raza').value = m.raza || '';
+    document.getElementById('m-edad').value = m.edad;
+    document.getElementById('m-peso').value = m.peso || '';
+
+    // Ocultar selector de dueño al editar, o precargarlo y deshabilitarlo
+    document.getElementById('grupo-cliente').style.display = 'none';
+
+    abrirModal('modal-mascota');
+  };
+
+  window.eliminarMascota = id => {
+    const m = Mascotas.getById(id);
+    if (!m) return;
+    if (!confirm(`¿Eliminar a ${m.nombre}? Se perderán todas sus citas e historial clínico permanentemente.`)) return;
+    Mascotas.remove(id);
+    toast(`${m.nombre} eliminada.`, 'info');
+    renderTabla();
+  };
+
+  // ── Init ──────────────────────────────────────────────────
+  renderTabla();
+</script>

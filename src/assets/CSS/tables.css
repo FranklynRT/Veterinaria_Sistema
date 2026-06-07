@@ -1,0 +1,265 @@
+/* =========================================================
+   tables.css — VetCare Pro
+   Estilos para tablas de datos, listas y filtros
+   ========================================================= */
+
+/* ─────────────────────────────────────────────
+   TABLA PRINCIPAL
+───────────────────────────────────────────── */
+.data-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(79,195,218,.1);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+}
+
+.data-table thead tr {
+  background: rgba(42,163,192,.07);
+  border-bottom: 1px solid rgba(79,195,218,.15);
+}
+
+.data-table th {
+  padding: .9rem 1.2rem;
+  text-align: left;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  white-space: nowrap;
+}
+.data-table th.sortable { cursor: pointer; user-select: none; }
+.data-table th.sortable:hover { color: var(--teal-300); }
+
+.data-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  transition: background var(--transition);
+}
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: rgba(255,255,255,.03); }
+
+.data-table td {
+  padding: .9rem 1.2rem;
+  color: rgba(255,255,255,.85);
+  vertical-align: middle;
+}
+
+/* Celda de avatar + nombre */
+.cell-avatar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.cell-avatar .avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal-600), var(--teal-400));
+  color: var(--white);
+  font-size: .8rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cell-avatar .av-mint  { background: linear-gradient(135deg, var(--mint), #22c99a); color: var(--teal-900); }
+.cell-avatar .av-gold  { background: linear-gradient(135deg, var(--gold), #f59e0b); color: var(--teal-900); }
+.cell-avatar .av-teal  { background: linear-gradient(135deg, var(--teal-400), var(--teal-300)); color: var(--teal-900); }
+.cell-name  { font-weight: 700; font-size: .9rem; }
+.cell-sub   { font-size: .75rem; color: rgba(255,255,255,.4); margin-top: .1rem; }
+
+/* Acciones */
+.cell-actions {
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+}
+
+/* Pet chips */
+.pet-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+.pet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: rgba(42,163,192,.1);
+  border: 1px solid rgba(79,195,218,.2);
+  color: var(--teal-300);
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .2rem .6rem;
+  border-radius: 50px;
+}
+
+/* ─────────────────────────────────────────────
+   TOOLBAR (búsqueda + filtros)
+───────────────────────────────────────────── */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 50px;
+  padding: .5rem 1.1rem;
+  flex: 1;
+  min-width: 180px;
+  max-width: 340px;
+  transition: border-color var(--transition);
+}
+.search-box:focus-within { border-color: var(--teal-400); }
+.search-box i { color: rgba(255,255,255,.4); font-size: .85rem; }
+.search-box input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--white);
+  font-family: inherit;
+  font-size: .88rem;
+  width: 100%;
+}
+.search-box input::placeholder { color: rgba(255,255,255,.3); }
+
+.filter-chips {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: .4rem .9rem;
+  border-radius: 50px;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.55);
+  transition: all var(--transition);
+}
+.filter-chip:hover { border-color: var(--teal-400); color: var(--teal-300); }
+.filter-chip.active { background: rgba(42,163,192,.15); border-color: var(--teal-400); color: var(--teal-300); }
+
+/* ─────────────────────────────────────────────
+   FICHA / DETAIL CARD
+───────────────────────────────────────────── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.detail-field { display: flex; flex-direction: column; gap: .3rem; }
+.detail-field label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.4); }
+.detail-field span  { font-size: .95rem; font-weight: 500; color: var(--white); }
+
+/* ─────────────────────────────────────────────
+   TIMELINE (Historial clínico)
+───────────────────────────────────────────── */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0 1rem;
+}
+
+.timeline-date-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.timeline-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--teal-400);
+  border: 2px solid var(--teal-300);
+  box-shadow: 0 0 0 4px rgba(42,163,192,.15);
+  flex-shrink: 0;
+  margin-top: .3rem;
+}
+.timeline-line {
+  width: 2px;
+  flex: 1;
+  background: rgba(79,195,218,.15);
+  margin: .4rem 0;
+}
+.timeline-item:last-child .timeline-line { display: none; }
+
+.timeline-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(79,195,218,.1);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.2rem;
+  transition: border-color var(--transition);
+}
+.timeline-card:hover { border-color: rgba(79,195,218,.25); }
+
+.timeline-meta {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: .8rem;
+  flex-wrap: wrap;
+}
+.timeline-fecha { font-size: .8rem; font-weight: 700; color: var(--teal-300); }
+
+.timeline-field { margin-bottom: .6rem; }
+.timeline-field:last-child { margin-bottom: 0; }
+.timeline-field strong { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.4); display: block; margin-bottom: .2rem; }
+.timeline-field p { font-size: .88rem; color: rgba(255,255,255,.8); line-height: 1.6; }
+
+/* ─────────────────────────────────────────────
+   MINI CALENDAR STRIP
+───────────────────────────────────────────── */
+.cal-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: .4rem;
+  margin-bottom: 1.5rem;
+}
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  padding: .5rem .2rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition);
+  border: 1px solid transparent;
+}
+.cal-day:hover { background: rgba(255,255,255,.05); }
+.cal-day.today { background: rgba(42,163,192,.15); border-color: rgba(79,195,218,.3); }
+.cal-day.selected { background: rgba(42,163,192,.25); border-color: var(--teal-400); }
+.cal-weekday { font-size: .65rem; text-transform: uppercase; color: rgba(255,255,255,.4); font-weight: 700; }
+.cal-num { font-size: .9rem; font-weight: 700; }
+.cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--mint); }
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .data-table th:nth-child(n+4),
+  .data-table td:nth-child(n+4) { display: none; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+  .search-box { max-width: 100%; }
+  .cal-strip { grid-template-columns: repeat(7, 1fr); }
+}
